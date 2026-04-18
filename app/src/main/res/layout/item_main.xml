@@ -40,9 +40,10 @@
 
         <Button
             android:id="@+id/btn_m_fav"
-            android:text="☆"
+            style="?attr/materialButtonOutlinedStyle"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
-            style="?attr/materialButtonOutlinedStyle"/>
+            android:backgroundTint="#E41C1C"
+            android:text="☆" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

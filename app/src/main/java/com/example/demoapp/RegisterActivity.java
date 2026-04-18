@@ -24,7 +24,8 @@ public class RegisterActivity extends AppCompatActivity {
         etConfirm = findViewById(R.id.et_reg_confirm);
         db = AppDatabase.getInstance(this);
 
-        findViewById(R.id.btn_reg).setOnClickListener(v -> register());
+        Button btnReg = findViewById(R.id.btn_reg);
+        btnReg.setOnClickListener(v -> register());
     }
 
     private void register() {
@@ -32,6 +33,7 @@ public class RegisterActivity extends AppCompatActivity {
         String pass = etPass.getText().toString().trim();
         String conf = etConfirm.getText().toString().trim();
 
+        // Валидация в UI-потоке
         if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             etEmail.setError("Некорректный Email");
             return;
@@ -45,19 +47,29 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
+
         exec.execute(() -> {
             User exists = db.userDao().getUserByEmail(email);
+
             runOnUiThread(() -> {
                 if (exists != null) {
                     Toast.makeText(this, "Пользователь уже существует", Toast.LENGTH_SHORT).show();
                     return;
                 }
+
+
                 User u = new User();
                 u.email = email;
                 u.password = pass;
-                db.userDao().insert(u);
-                Toast.makeText(this, "Успешная регистрация", Toast.LENGTH_SHORT).show();
-                finish();
+
+
+                exec.execute(() -> {
+                    db.userDao().insert(u);
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Успешная регистрация", Toast.LENGTH_SHORT).show();
+                        finish();
+                    });
+                });
             });
         });
     }
